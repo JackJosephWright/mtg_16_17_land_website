@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examining the Difference in Win Rate between 16 and 17 Land Limited Decks on Arena</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Examining the Difference in Win Rate between 16 and 17 Land Limited Decks on Arena</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Data:</h2>
+            <p>17lands data from the sets 'DMU', 'LCI', 'LTR', 'MOM', 'SIR', 'SNC' for best of 1 Premier Draft and only looking at two-color pairs.</p>
+        </section>
+        
+        <section>
+            <h2>Synopsis:</h2>
+            <p>16-land decks appear to have higher win rates than 17-land decks when considering mana curve, across set/color pair variations and within specific subsets of a color pair in <em>best of one MTG Arena</em> limited games. I propose the additional win rate comes from 16-land decks having access to an additional spell, thereby enhancing overall mana efficiency on any given turn.</p>
+        </section>
+
+        <section>
+            <h2>Outline:</h2>
+            <ul>
+                <li>Why the default is 17 lands</li>
+                <li>Macro win rate by Land count: Challenges in analysis</li>
+                <li>Effect of Curve type on win rate and land count</li>
+                <li>Set/color pair specific win rates (heterogeneity)</li>
+                <li>Single Archetype deep dive: Identifying Extra Win Rate Source</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Why the Default is 17 Lands</h2>
+            <p>Conventional wisdom in limited Magic suggests using 17 lands in a deck. Frank Karsten's research on successful tournament decks and simulation modeling supports this notion. Although I can’t find the original article this is quoted from, he has the following to say about land counts in limited:</p>
+
+            <blockquote>
+                <p>The numbers for 17 lands in Limited are similar to the ones for 25 lands in Standard. This also makes sense because 25 * 40/60 = 17.5. Since typical Limited decks need their first 3 land drops, would like to hit their 4th land drop, but don’t necessarily need 5 lands by turn 5, the age-old standard of 17 lands indeed seems like a good number.</p>
+                <p><strong>Frank Karsten</strong></p>
+            </blockquote>
+            <p>Source: <a href="https://draftsim.com/mtg-40-card-deck-number-of-lands/">Draftsim</a></p>
+
+            <p>This recommendation is also echoed by the MTGA client during deck building. I think the rationale behind this recommendation is rooted in hypergeometric optimization, factoring in probabilities of having a certain number of lands on a given turn while minimizing the risk of flooding out.</p>
+        </section>
+
+        <section>
+            <h2>Win Rate by Land Count</h2>
+            <p>Analyzing the average win rates of limited decks from 17lands public datasets by land count reveals intriguing patterns:</p>
+            <img src = "plots/win_rate_lands_in_deck.png" alt = "Win Rate by Land Count" class = "img-small">
+            <ul>
+                <li>Decks with curves that are more efficient on early turns perform better in general than decks that are more efficient in later turns</li>
+                <li>Strong archetypes may skew the data.</li>
+                <li>People might only play 15 or 16 lands when the opportunity is right, therefore distorting the data</li>
+                <li>Since 17 lands is suggested by arena, only strong players might change their land counts, artificially increasing the win rate of land counts that are not 17 lands</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Effect of Curve Type on Land Count Win Rate</h2>
+            <p>In order to address the effects of a deck's mana curve on mana efficiency and win rate, I have created a metric called “curve score”. I have an explanation on how I created it and its general operation here.</p>
+
+            <p>In summary, I looked at the effect of the mana curve on mana efficiency (not win rate) and created a single metric that associates certain curve’s mana efficiency based on the turn of the game. I am still developing this, so I’m sure there is room for improvement, but in general, it works intuitively.</p>
+
+            <p>Here are some examples of the average curve based on curve score:</p>
+            <img src="plots/curve_bar_low.png" alt="Low Curve" class="curve-image">
+            <img src="plots/curve_bar_mid.png" alt="Mid Curve" class="curve-image">
+            <img src="plots/curve_bar_high.png" alt="High Curve" class="curve-image">
+        
+            <p>As you can see, high curve scores have lots of cheap cards, medium curve scores have curves like the one Frank Karsten defines in his article <a href="https://www.channelfireball.com/article/What-s-an-Optimal-Mana-Curve-and-Land-Ramp-Count-for-Commander/e22caad1-b04b-4f8a-951b-a41e9f08da14/" target="_blank" rel="noopener noreferrer">“What is the Optimal Mana Curve and Land/Ramp Count for Commander?”</a>. Low curve scores have lots of expensive cards and are obviously very mana efficient in the late game (when you have lots of lands!)</p>
+
+            <p>Since I can now group decks by curve score, I can look at land count and win rate by how aggressively decks are built.</p>
+            <img src = "plots/curves_3.png" alt = "Win Rate by Land Count and Curve Score" width="600">
+            <p>This plot shows that the general trend of 16 land decks having higher win rates than 17 land decks exists across all subsets of curve score (decks designed to be efficient at different points in the game). The win rate differences between 16 and 17 lands specifically are found to be statistically significant using hypothesis testing (total population 4 million games, alpha .05).</p>
+
+            <p>A problem pointed out with this analysis is that some very successful archetypes (think UR in LCI) are hiding in certain parts of the data and distorting the results. I think I am testing for the effect of lands on win rate, but really I am testing for the presence of some very strong archetype in a specific slot in the land count data.</p>
+
+            <p>In order to address this I performed testing on every set/color pair in my dataset.</p>
+        </section>
+
+        <section>
+            <h2>Set/Color Pair Specific Win Rates (Heterogeneity)</h2>
+            <p>Once the data is subset to set/color pair (like UR in LCI or WG in MOM), the data starts to look more noisy and starts to take on some set-specific shapes.</p>
+            <img src = "plots/heterogeneity_wg.png" alt = "Win Rate by Land Count for WG in MOM" class = "img-small">
+            <img src = "plots/heterogeneity_ur.png" alt = "Win Rate by Land Count for UR in LCI" class = "img-small">
+            <p>I tested every set/color pair combination and found that <strong>16 lands has a higher win rate than 17 lands</strong> in <strong>90% of the subsets</strong>, (not subset by curve type) and <strong>67% of those subsets passed a one-sided t-test (alpha = .05)</strong>.</p>
+        </section>
+
+        <section>
+            <h2>Single Archetype Deep Dive: Where the Extra Win Rate Comes From</h2>
+            <p>In order to determine where the extra win rate comes from in 16 vs 17 land decks, I tried to control as many variables as possible and only change the land count from 16 to 17 lands and examine the results.</p>
+
+            <p>I chose BR from LTR as the data because it has the largest amount of games played in my overall dataset (184,028 games).</p>
+
+            <h3>Curve Type:</h3>
+            <p>Because of my curve score, I was able to identify differences in the types of decks 16 and 17 land users play.</p>
+            <img src = "plots/individual_arch_curve_hist.png"   alt = "Curve Type Distribution for BR in LTR" class = "img-small">  
+            <p>16 land users play slightly more aggressive decks than 17 land users. I used resampling to create a dataset where the curve types between the two groups are the same.</p>
+            <img src = "plots/individual_arch_curve_resample_hist.png"  alt = "Curve Type Distribution for BR in LTR (Resampled)" class = "img-small">
+            <h3>Player Skill:</h3>
+            <p>I have noted in other investigations that players at different ranks seem to perform differently. By rule of thumb, the higher the rank, the more mana a player spends. You can read about it <a href="https://jackjosephwright.github.io/mtg_diamond_mythic/" target="_blank" rel="noopener noreferrer">here</a>. <em>(I am just joking around about the title, this is written tongue in cheek.)</em></p>
+
+            <p><em>Caveat:</em> I am not interested in the topic of rank/skill, I am sure there are things wrong in that article, but the general trends suggest you should control for rank if possible.</p>
+
+            <p>I performed the same resampling so that the ranks were evenly distributed across 16 and 17 lands.</p>
+
+            <h3>Card Quality:</h3>
+            <p>A card's ALSA (average last seen at) is a metric calculated by 17lands. It is the average pick that a card is last seen in the draft. Sierkovitz has shown how ALSA itself is not linear, but I have found that a deck’s average ALSA seems to have some linear correlation with win rate.</p>
+            <img src = "plots/mean_won_alsa_norm_bins.png" alt = "Win Rate by ALSA" width = "600">
+
+            <p>In general, I think this makes sense. If a deck has more cards that generally go early, (and players in aggregate pick better cards early) the correlation passes an intuitive check. I don’t have any further investigation on this other than I want to control for a deck’s card quality by matching them between the two land counts.</p>
+            <img src = "plots/density_plot_curve_score.png" alt = "Density Plot of Curve Score" class = "img-small">
+            <p>By resampling again, I produced a dataset where card quality is roughly the same.</p>
+
+            <h3>Results:</h3>
+            <p>Once all of these variables were controlled for (each resample the curve type, card quality, and rank distribution was tested for statistically significant differences, and no difference was found) there is still a statistically significant difference in win rate between 16 and 17 lands, although the difference has shrunk considerably. You can see the difference in the plot below. (Note: The graph only shows the final win rate, not the win rate at each resampling step.)</p>
+
+            <p>My hypothesis for the remaining difference is that players tend to win more when they have more mana available to them, or when they make more decisions during the game. 16-land decks have an extra spell, and therefore have more access to cards in general.</p>
+
+            <p>In general, I find mana efficiency to be correlated with win rate, and as such, it is expected that 16 land decks have a higher win rate than 17 land decks.</p>
+        </section>
+
+        <section>
+            <h2>Results</h2>
+            <p>
+                After applying these controls I found a 1.2% higher win rate for 16 land decks than 17 land decks forBR in LTR.
+            </p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Land Count</th>
+                        <th>Mean Win Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>16 Lands</td>
+                        <td>0.595</td>
+                    </tr>
+                    <tr>
+                        <td>17 Lands</td>
+                        <td>0.583</td>
+                    </tr>
+                </tbody>
+            </table>
+         
+            <p style="background-color: #f0f8ff; color: #333; font-weight: bold; font-size: 1.2em; padding: 10px; border-radius: 5px;">
+                <strong>This is 75% of the difference in win rate between 16 land decks and 17 land decks in the overall win rate difference from the very beginning of the investigation.</strong>
+            </p>
+            
+            
+        </section>
+        <section>
+            <h2>
+                Explanation for the Difference in Win Rate
+            </h2>
+            <p style="background-color: #e0f7fa; color: #333; font-style: italic; padding: 10px; border-radius: 5px;">
+                Win rate and mana efficiency (the cause of mana differential) are highly correlated in Magic, and the trend is linear around the average difference in a game of Magic (0 mana).
+            </p>
+            <img src = "plots/win_rate_mana_diff.png" alt = "Win Rate by Mana Differential" width = "600">
+            <p>
+                I found a consistent difference in mana efficiency between the 16 and 17 land decks.
+
+            </p>
+            <img  src = "plots/diff_in_mana_spent_by_lands.png" alt = "Difference in Mana Spent by Lands" width = "600">
+            <p>
+                As you can see in the graph above, at every turn in the game, 16 land decks are more efficient than 17 land decks (with the difference increasing as games go longer.) I multiplied these average differences by the percent of total games that end on those turns, and found that <strong>16 land decks spend .33 more mana than 17 land decks.</strong>
+          
+           
+            </p>
+            <p>
+                When you model the linear range of win rate vs mana differential, the model predicts a difference in win rate of 1.9% for a mana differential  of .33. 
+
+            </p>
+            <h3>
+                Where does the mana efficiency come from?
+            </h3>
+            <p>
+                If the curve scores are held constant between the two decks, how is a 16 land deck more efficient at every stage of the game? To examine this, I looked at the average value of each curve slot in the 16 and 17 land decks. 
+            </p>
+            <img src = "plots/efficiency_table.png" alt = "Efficiency Table" width = "600">
+            <p>
+                Notice how the 16 land deck seems to have fractionally more cards at every slot in the curve (besides 5) 
+            </p>
+            <p>
+                It makes sense that a deck with more one drops is more efficient on turn one, the same logic goes for turn two, turn three, etc…
+            </p>
+            <p>
+                If you sum up all the differences between 16 land  and 17 land curve slots you get:
+                <p style="
+                background-color: #ffecb3; 
+                color: #d84315; 
+                font-size: 1.5em; 
+                font-weight: bold; 
+                padding: 15px; 
+                border-radius: 8px; 
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+                margin: 20px 0;
+            ">
+                Total card difference = <strong>1.0098995543333038</strong> : Exactly 1 nonland card more in 16 land decks, effectively increasing mana efficiency on every turn
+            </p>
+            <p>
+                
+By playing one less land, and in aggregate spreading that extra card out across all possible curve slots, <strong>you are effectively increasing your mana efficiency at all points in the curve. </strong>
+
+            </p>
+
+            
+        </section>
+
+        <section>
+            <h2>Conclusion</h2>
+            <p>
+                The essence of the analysis is that <strong>by playing more spells, you are increasing a deck’s ability to be mana efficient on a particular turn.</strong> When this data is looked at in aggregate, we can see that this is not exclusive to decks that want to be efficient early; the extra card can be placed at any spot in the curve where the extra efficiency is desired. When modeling win rate vs mana differential, this increase in efficiency suggests a very similar win rate to the difference in win rate observed in the 16 land vs 17 land data.
+            </p>
+            
+            <p>
+                In best of 1 Arena, there is a “hand smoother” that decreases the variance on too many/too few land hands, and this might account for diminishing the penalty incurred by playing fewer lands. However, very similar trends in win rate are found in best of 3 data (no hand smoother) compared to the best of 1 data (smoother).
+            </p>
+            
+        </section>
+    </main>
+</body>
+</html>
